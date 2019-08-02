@@ -1,0 +1,37 @@
+version: '3'
+services:
+  ss-local-clusters:
+    image: shadowsocks/shadowsocks-libev
+    user: root
+    volumes:
+      - ./ss-run.sh:/entrypoint.sh
+      - ./ss.lst:/ss.lst
+    command: /entrypoint.sh
+    networks:
+      - proxies
+
+  # load balansce
+  haproxy:
+    image: haproxy:latest
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - proxies
+    ports:
+      - 8989:8001
+
+  polipo:
+    image: vimagick/polipo
+    command:
+      serverMaxSlots=8
+      serverSlots=2
+      socksParentProxy=haproxy:8001
+    networks:
+      - proxies
+    ports:
+      - 8123:8123
+    restart: 'no'
+
+networks:
+  proxies:
+    driver: bridge
