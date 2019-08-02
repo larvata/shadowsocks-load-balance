@@ -18,19 +18,16 @@ services:
     networks:
       - proxies
     ports:
-      - 8989:8001
+      - ${HAPROXY_PORT}:8001
 
-  polipo:
-    image: vimagick/polipo
-    command:
-      serverMaxSlots=8
-      serverSlots=2
-      socksParentProxy=haproxy:8001
+  privoxy:
+    image: vimagick/privoxy
+    ports:
+      - ${PRIVOXY_PORT}:8119
+    volumes:
+      - ./privoxy.cfg:/etc/privoxy/config
     networks:
       - proxies
-    ports:
-      - 8123:8123
-    restart: 'no'
 
 networks:
   proxies:

@@ -9,7 +9,7 @@ Use haproxy for load balancing multiple shadowsocks nodes.
 - shadowsocks subscription
 
 ```
-A shadowsocks subscription is a json format with following structure:
+A shadowsocks subscription is a json look likes following structure:
 
 {
     "configs": [{
@@ -22,10 +22,11 @@ A shadowsocks subscription is a json format with following structure:
 }
 ```
 
-## Useage
+## Usage
 
 ```
 # create .env file and setup your shadowsocks subscription url
+# and customize the proxy port number
 
 # generate haproxy config file and required server list
 ./renewal.sh
@@ -34,3 +35,8 @@ A shadowsocks subscription is a json format with following structure:
 docker-compose up
 
 ```
+
+
+## How it works
+
+...
