@@ -112,9 +112,13 @@ defaults
     balance roundrobin
     # retries 3
     maxconn 5000
-    timeout connect 500ms
-    timeout client  3s
-    timeout server  3s
+
+    # https://www.haproxy.com/blog/websockets-load-balancing-with-haproxy/
+    timeout client          25s
+    timeout connect          5s
+    timeout server          25s
+    # timeout tunnel available in ALOHA 5.5 or HAProxy 1.5-dev10 and higher
+    timeout tunnel        3600s
 
 frontend shadowsocks
 ${bindLines.join('\n')}
