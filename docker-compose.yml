@@ -1,24 +1,28 @@
 version: '3'
 services:
   ss-local-clusters:
-    image: shadowsocks/shadowsocks-libev
+    image: kaive/shadowsocks-libev
     user: root
     volumes:
       - ./ss-run.sh:/entrypoint.sh
-      - ./ss.lst:/ss.lst
+      - ./ss-cli.lst:/ss.lst
     command: /entrypoint.sh
     networks:
       - proxies
+    ports:
+      - "9000-9034:9000-9034"
 
   # load balansce
   haproxy:
     image: haproxy:latest
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - ss-local-clusters
     networks:
       - proxies
     ports:
-      - ${HAPROXY_PORT}:8001
+      - ${HAPROXY_PORT}:8007
 
   privoxy:
     image: vimagick/privoxy

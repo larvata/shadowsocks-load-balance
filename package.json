@@ -1,0 +1,31 @@
+{
+  "name": "shadowsocks-load-balance",
+  "version": "1.0.0",
+  "description": "Use haproxy for load balancing multiple shadowsocks nodes.",
+  "main": "benchmark.js",
+  "dependencies": {
+    "request-compose": "^2.0.0",
+    "socks-proxy-agent": "^5.0.0",
+    "socks5-http-client": "^1.0.4",
+    "socks5-https-client": "^1.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/larvata/shadowsocks-load-balance.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/larvata/shadowsocks-load-balance/issues"
+  },
+  "homepage": "https://github.com/larvata/shadowsocks-load-balance#readme"
+}

@@ -2,3 +2,6 @@
 
 haproxy.cfg
 ss.lst
+ss-cli.lst
+
+node_modules/

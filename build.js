@@ -10,38 +10,86 @@ const PORT_START = 9000;
 const EXPORT_START = 8000;
 
 function loadConfiguration(cfgStr) {
-  const cfg = JSON.parse(cfgStr);
-  return cfg;
+  const cfg = JSON.parse(cfgStr)
+  const uniq = cfg.configs.reduce((a,b) => {
+    const exists = a.some((aa) => aa.server === b.server && aa.server_port === b.server_port);
+    if (!exists) {
+      a.push(b);
+    }
+    return a;
+  }, []);
+
+  uniq.forEach((ss, idx) => (ss.local_port = PORT_START + idx));
+
+  console.log('cfg', cfg.configs.length, 'uniq', uniq.length)
+  return { configs: uniq };
 }
 
 function parseServerConfiguration(scfg) {
-  const l = scfg.remarks.includes('标准') ? 'normal' : 'bgp';
-  const c = scfg.server.replace(/(^[a-z]+)[0-9]+.*/, (a, b) => b);
-  return {
-    country: c,
+
+  const l = scfg.remarks.includes('专线')
+    ? 'normal'
+    : scfg.remarks.includes('中继')
+      ? 'bgp'
+      : 'unknown';
+
+  const result = {
     level: l,
-    key: `${c}-${l}`,
-  }
+  };
+
+
+  [
+    {
+      k: 'singapore',
+      c: '新加坡',
+    },
+    {
+      k: 'hongkong',
+      c: '香港',
+    },
+    {
+      k: 'russia',
+      c: '俄罗斯',
+    },
+    {
+      k: 'gemnary',
+      c: '德国',
+    },
+    {
+      k: 'taiwan',
+      c: '台湾',
+    },
+    {
+      k: 'japan',
+      c: '日本',
+    },
+    {
+      k: 'us',
+      c: '美国',
+    },
+  ].some((c) => {
+    if (scfg.remarks.includes(c.c)) {
+      result.country = c.k;
+      return true;
+    }
+  });
+
+  result.key = `${result.level}-${result.country}`;
+  return result;
 }
 
 
-function getShadowsocksList(sscfg) {
+function getShadowsocksCli(sscfg) {
   // extract auth info
-  const { server_port, method, password } = sscfg.configs[0];
-  const servers = sscfg.configs.map(ss => ss.server);
-  const sslst =
-`${server_port}
-${method}
-${password}
-${servers.join('\n')}`;
-  return sslst;
+  const cli = sscfg.configs.map((ss) => `ss-local -s ${ss.server} -p ${ss.server_port} -m ${ss.method} -k ${ss.password} -l ${ss.local_port} -b 0.0.0.0 --plugin obfs-local --plugin-opts "obfs=http;obfs-host=a9fa6129375.microsoft.com"`);
+  const ssCli = cli.join('\n');
+  return ssCli;
 }
 
 function getHaproxyConfiguration(sscfg) {
   const bindLines = []
   const backendLines = [];
 
-  sscfg.configs.forEach((ss, idx) => (ss.local_port = PORT_START+idx));
 
   // prepare grouped server configs
   const grouped = sscfg.configs.reduce((a, b) => {
@@ -94,7 +142,7 @@ function getHaproxyConfiguration(sscfg) {
   `)
 
     grouped[k].data.forEach(s => {
-      backendLines.push(`    server ${s.server} ss-local-clusters:${s.local_port} check inter 10m`)
+      backendLines.push(`    server ${s.server}-${s.server_port} ss-local-clusters:${s.local_port} check inter 10m`)
     })
   })
 
@@ -141,12 +189,12 @@ stdin.on('end', function() {
   // const sscmd = getShadowsocksStartupScript(cfg);
   // const ssverbose = getShadowsocksStartupVerboseScript(cfg);
 
-  const sslst = getShadowsocksList(cfg);
+  const sscli = getShadowsocksCli(cfg);
   const haproxy = getHaproxyConfiguration(cfg);
 
   // fs.writeFileSync('ss-cmd.sh', sscmd);
   // fs.writeFileSync('ss-cmd-verbose.sh', ssverbose);
-  fs.writeFileSync('ss.lst', sslst);
+  fs.writeFileSync('ss-cli.lst', sscli);
   fs.writeFileSync('haproxy.cfg', haproxy);
   console.log('done.');
 });

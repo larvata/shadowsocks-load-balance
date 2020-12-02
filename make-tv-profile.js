@@ -1,0 +1,73 @@
+const fs = require('fs');
+const rix = require('./profile-rix.json');
+
+const defaultConfig = {
+  route: 'bypass-lan-china',
+  remote_dns: '8.8.8.8',
+  ipv6: true,
+  metered: false,
+  proxy_apps: {
+    enabled: true,
+    bypass: true,
+    android_list: [
+      'com.cibn.tv',
+      'com.xiaodianshi.tv.yst',
+      'com.isakura',
+      'com.droidlogic.miracast',
+      'hk.minix.xbmc',
+      'com.waxrain.airplaydmr',
+    ],
+  },
+  udpdns: false,
+};
+
+const result = rix.configs.map((rc) => {
+  return {
+    ...defaultConfig,
+
+    server: rc.server,
+    server_port: rc.server_port,
+    password: rc.password,
+    method: rc.method,
+    remarks: rc.remarks,
+  };
+});
+
+result.push({
+  ...defaultConfig,
+
+  server: 'aws.larvata.me',
+  server_port: 52332,
+  password: 'happykdm',
+  method: 'chacha20-ietf',
+});
+
+result.push({
+  ...defaultConfig,
+
+  server: 'aws2.larvata.me',
+  server_port: 52332,
+  password: 'happykdm',
+  method: 'chacha20-ietf',
+});
+
+result.push({
+  ...defaultConfig,
+
+  server: 'qkvm.larvata.me',
+  server_port: 24367,
+  password: 'magicpoint1',
+  method: 'chacha20-ietf-poly1305',
+});
+
+result.push({
+  ...defaultConfig,
+
+  server: 'hostdare.larvata.me',
+  server_port: 24367,
+  password: 'magicpoint1',
+  method: 'chacha20-ietf-poly1305',
+});
+
+
+fs.writeFileSync('ppp.json', JSON.stringify(result, null, 2));
