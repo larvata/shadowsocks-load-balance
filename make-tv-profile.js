@@ -21,7 +21,7 @@ const defaultConfig = {
   udpdns: false,
 };
 
-const result = rix.configs.map((rc) => {
+const result = rix.map((rc) => {
   return {
     ...defaultConfig,
 
@@ -30,6 +30,8 @@ const result = rix.configs.map((rc) => {
     password: rc.password,
     method: rc.method,
     remarks: rc.remarks,
+    plugin: rc.plugin,
+    plugin_opts: rc.plugin_opts,
   };
 });
 
@@ -39,7 +41,7 @@ result.push({
   server: 'aws.larvata.me',
   server_port: 52332,
   password: 'happykdm',
-  method: 'chacha20-ietf',
+  method: 'chacha20-ietf-poly1305',
 });
 
 result.push({
@@ -48,15 +50,15 @@ result.push({
   server: 'aws2.larvata.me',
   server_port: 52332,
   password: 'happykdm',
-  method: 'chacha20-ietf',
+  method: 'chacha20-ietf-poly1305',
 });
 
 result.push({
   ...defaultConfig,
 
   server: 'qkvm.larvata.me',
-  server_port: 24367,
-  password: 'magicpoint1',
+  server_port: 52332,
+  password: 'happykdm',
   method: 'chacha20-ietf-poly1305',
 });
 
@@ -64,10 +66,18 @@ result.push({
   ...defaultConfig,
 
   server: 'hostdare.larvata.me',
-  server_port: 24367,
-  password: 'magicpoint1',
+  server_port: 52332,
+  password: 'happykdm',
   method: 'chacha20-ietf-poly1305',
 });
 
+result.push({
+  ...defaultConfig,
+
+  server: 'vultr.larvata.me',
+  server_port: 52332,
+  password: 'happykdm',
+  method: 'chacha20-ietf-poly1305',
+});
 
 fs.writeFileSync('ppp.json', JSON.stringify(result, null, 2));

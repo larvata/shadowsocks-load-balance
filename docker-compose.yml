@@ -22,7 +22,7 @@ services:
     networks:
       - proxies
     ports:
-      - ${HAPROXY_PORT}:8007
+      - ${HAPROXY_PORT}:8001
 
   privoxy:
     image: vimagick/privoxy

@@ -40,3 +40,6 @@ docker-compose up
 ## How it works
 
 ...
+
+
+var r = t.split('\n').filter(t=>t).map(t=>decodeURIComponent(t).match(/ss\:\/\/([^@]*)@([^:]*):(\d*)\/\?plugin=([^;]*);([^&]*)&[^#]*#(.*)$/)).map(t=>({remarks:t[6],server:t[2],server_port:t[3],method:atob(t[1]).split(':')[0],password:atob(t[1]).split(':')[1],plugin:t[4],plugin_opts:t[5]}))

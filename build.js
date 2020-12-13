@@ -11,7 +11,7 @@ const EXPORT_START = 8000;
 
 function loadConfiguration(cfgStr) {
   const cfg = JSON.parse(cfgStr)
-  const uniq = cfg.configs.reduce((a,b) => {
+  const uniq = cfg.reduce((a,b) => {
     const exists = a.some((aa) => aa.server === b.server && aa.server_port === b.server_port);
     if (!exists) {
       a.push(b);
@@ -21,15 +21,15 @@ function loadConfiguration(cfgStr) {
 
   uniq.forEach((ss, idx) => (ss.local_port = PORT_START + idx));
 
-  console.log('cfg', cfg.configs.length, 'uniq', uniq.length)
-  return { configs: uniq };
+  console.log('cfg', cfg.length, 'uniq', uniq.length)
+  return uniq;
 }
 
 function parseServerConfiguration(scfg) {
 
   const l = scfg.remarks.includes('专线')
     ? 'normal'
-    : scfg.remarks.includes('中继')
+    : scfg.remarks.includes('隧道')
       ? 'bgp'
       : 'unknown';
 
@@ -74,14 +74,14 @@ function parseServerConfiguration(scfg) {
     }
   });
 
-  result.key = `${result.level}-${result.country}`;
+  result.key = `${result.level}`;
   return result;
 }
 
 
 function getShadowsocksCli(sscfg) {
   // extract auth info
-  const cli = sscfg.configs.map((ss) => `ss-local -s ${ss.server} -p ${ss.server_port} -m ${ss.method} -k ${ss.password} -l ${ss.local_port} -b 0.0.0.0 --plugin obfs-local --plugin-opts "obfs=http;obfs-host=a9fa6129375.microsoft.com"`);
+  const cli = sscfg.map((ss) => `ss-local -s ${ss.server} -p ${ss.server_port} -m ${ss.method} -k ${ss.password} -l ${ss.local_port} -b 0.0.0.0 --plugin ${ss.plugin} --plugin-opts "${ss.plugin_opts}"`);
   const ssCli = cli.join('\n');
   return ssCli;
 }
@@ -92,7 +92,7 @@ function getHaproxyConfiguration(sscfg) {
 
 
   // prepare grouped server configs
-  const grouped = sscfg.configs.reduce((a, b) => {
+  const grouped = sscfg.reduce((a, b) => {
     // parse server type
     const st = parseServerConfiguration(b);
     const { country, level, key } = st;
