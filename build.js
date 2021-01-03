@@ -10,9 +10,13 @@ const PORT_START = 9000;
 const EXPORT_START = 8000;
 
 function loadConfiguration(cfgStr) {
-  const cfg = JSON.parse(cfgStr)
-  const uniq = cfg.reduce((a,b) => {
-    const exists = a.some((aa) => aa.server === b.server && aa.server_port === b.server_port);
+  const cfg = JSON.parse(cfgStr);
+  const uniq = cfg.reduce((a, b) => {
+    const exists = a.some((aa) =>
+      aa.server === b.server
+      && aa.server_port === b.server_port
+      && aa.plugin === b.plugin
+      && aa.plugin_opts === b.plugin_opts);
     if (!exists) {
       a.push(b);
     }
@@ -67,6 +71,26 @@ function parseServerConfiguration(scfg) {
       k: 'us',
       c: '美国',
     },
+    {
+      k: 'asian',
+      c: '亚洲',
+    },
+    {
+      k: 'australia',
+      c: '澳洲',
+    },
+    {
+      k: 'america',
+      c: '南美',
+    },
+    {
+      k: 'europe',
+      c: '欧洲',
+    },
+    {
+      k: 'korea',
+      c: '韩国',
+    },
   ].some((c) => {
     if (scfg.remarks.includes(c.c)) {
       result.country = c.k;
@@ -74,8 +98,14 @@ function parseServerConfiguration(scfg) {
     }
   });
 
-  result.key = `${result.level}`;
-  return result;
+  // result.key = `${result.level}`;
+  // console.log(result.country)
+  if (!result.country) {
+    console.log(scfg.remarks)
+  }
+  result.key = result.country;
+  result.haproxyKey = `server ${scfg.server}-${scfg.server_port}-${Math.random().toString(36).substring(2, 7)} ss-local-clusters:${scfg.local_port} check inter 10m`;
+  return { ...result, ...scfg };
 }
 
 
@@ -86,42 +116,73 @@ function getShadowsocksCli(sscfg) {
   return ssCli;
 }
 
+
 function getHaproxyConfiguration(sscfg) {
   const bindLines = []
   const backendLines = [];
 
+  const parsedConfig = sscfg.map((s) => parseServerConfiguration(s));
 
   // prepare grouped server configs
-  const grouped = sscfg.reduce((a, b) => {
+  const grouped = parsedConfig.reduce((a, b) => {
     // parse server type
-    const st = parseServerConfiguration(b);
-    const { country, level, key } = st;
+    const { country, level, key } = b;
 
     if (!a[key]) {
       a[key] = {
         data: [],
-      }
+      };
     }
 
-    a[key].data.push(b)
-    return a
+    a[key].data.push(b);
+    return a;
   }, {});
+
+  // add all mixed config
+  bindLines.push(`    bind *:${EXPORT_START} name port${EXPORT_START}`);
 
   const keys = Object.keys(grouped);
   keys.forEach((k, kid) => {
-    const port = EXPORT_START + kid;
+    const port = EXPORT_START + kid + 1;
     bindLines.push(`    bind *:${port} name port${port}`);
-  })
+  });
 
   bindLines.push('');
   bindLines.push('');
+
+  bindLines.push(
+`    acl port${EXPORT_START} dst_port ${EXPORT_START}
+    use_backend mixed if port${EXPORT_START}`);
+
 
   keys.forEach((k, kid) => {
-    const port = EXPORT_START + kid;
+    const port = EXPORT_START + kid + 1;
     bindLines.push(
 `    acl port${port} dst_port ${port}
     use_backend ${k} if port${port}`);
-  })
+  });
+
+  // add all mixed backend
+  backendLines.push(
+`\nbackend mixed
+    option tcp-check
+    tcp-check connect
+
+    tcp-check send-binary 05020001
+    tcp-check expect binary 0500 # means local client working okay
+    tcp-check send-binary 05010001acd9a04e0050 # try to acess google ip
+    tcp-check expect binary 05000001
+    tcp-check send GET\\ /\\ HTTP/1.1\\r\\n
+    tcp-check send Host:\\ google.com\\r\\n
+    tcp-check send User-Agent:\\ curl/7.43.0\\r\\n
+    tcp-check send Accept:\\ */*\\r\\n
+    tcp-check send \\r\\n
+    tcp-check expect rstring ^HTTP/1.1\\ 301
+  `);
+
+  parsedConfig.forEach(s => {
+    backendLines.push(`    ${s.haproxyKey}`);
+  });
 
   keys.forEach((k, kid) => {
     backendLines.push(
@@ -142,7 +203,7 @@ function getHaproxyConfiguration(sscfg) {
   `)
 
     grouped[k].data.forEach(s => {
-      backendLines.push(`    server ${s.server}-${s.server_port} ss-local-clusters:${s.local_port} check inter 10m`)
+      backendLines.push(`    ${s.haproxyKey}`);
     })
   })
 

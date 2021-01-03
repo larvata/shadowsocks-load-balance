@@ -10,7 +10,7 @@ services:
     networks:
       - proxies
     ports:
-      - "9000-9034:9000-9034"
+      - "9000-9059:9000-9059"
 
   # load balansce
   haproxy:
@@ -22,7 +22,7 @@ services:
     networks:
       - proxies
     ports:
-      - ${HAPROXY_PORT}:8001
+      - ${HAPROXY_PORT}:8000
 
   privoxy:
     image: vimagick/privoxy

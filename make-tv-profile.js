@@ -1,5 +1,5 @@
 const fs = require('fs');
-const rix = require('./profile-rix.json');
+const rix = require('./luffy.json');
 
 const defaultConfig = {
   route: 'bypass-lan-china',
