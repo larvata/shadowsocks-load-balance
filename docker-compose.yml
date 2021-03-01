@@ -10,7 +10,7 @@ services:
     networks:
       - proxies
     ports:
-      - "9000-9034:9000-9034"
+      - "9000-9059:9000-9059"
 
   # load balansce
   haproxy:
