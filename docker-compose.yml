@@ -6,7 +6,7 @@ services:
     volumes:
       - ./ss-run.sh:/entrypoint.sh
       - ./ss-cli.lst:/ss.lst
-    command: /entrypoint.sh
+    command: /entrypoint.sh -v
     networks:
       - proxies
     ports:
@@ -29,7 +29,9 @@ services:
     ports:
       - ${PRIVOXY_PORT}:8119
     volumes:
-      - ./privoxy.cfg:/etc/privoxy/config
+      - ./privoxy/privoxy.cfg:/etc/privoxy/config
+      - ./privoxy/default.action:/etc/privoxy/default.action
+      - ./privoxy/user.action:/etc/privoxy/user.action
     networks:
       - proxies
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const url = require('url')
+const querystring = require('querystring')
 
 
 // port for ss local
@@ -9,8 +11,14 @@ const PORT_START = 9000;
 // port for haproxy exposed
 const EXPORT_START = 8000;
 
-function loadConfiguration(cfgStr) {
-  const cfg = JSON.parse(cfgStr);
+function atob(base64) {
+  console.log(base64)
+  const buff = Buffer.from(base64, 'base64');
+  return buff.toString('utf-8');
+}
+
+function loadConfiguration(cfg) {
+  // const cfg = JSON.parse(cfgStr);
   const uniq = cfg.reduce((a, b) => {
     const exists = a.some((aa) =>
       aa.server === b.server
@@ -27,6 +35,43 @@ function loadConfiguration(cfgStr) {
 
   console.log('cfg', cfg.length, 'uniq', uniq.length)
   return uniq;
+}
+
+function loadSubscription(subscription) {
+  const lines = subscription.split('\n').filter(l=>l);
+  return lines.map((line) => {
+    const u = url.parse(line);
+
+    const auth = atob(u.auth);
+    const [method, password] = auth.split(':');
+    const server = u.hostname;
+    const server_port = u.port;
+    const remarks = decodeURIComponent(u.hash.replace(/^#/, ''));
+
+    const result = {
+      remarks,
+      server,
+      server_port,
+      method,
+      password,
+    };
+
+    const qs = querystring.parse(u.query);
+
+    if (qs.plugin) {
+      const [plugin, plugin_opts, plugin_opts_rest] = qs.plugin.split(';');
+      result.plugin = plugin;
+      result.plugin_opts = [plugin_opts, plugin_opts_rest].join(':');
+    }
+
+    if (qs.group) {
+      const group = atob(qs.group);
+      result.group = group;
+    }
+
+    console.log(result);
+    return result;
+  })
 }
 
 function parseServerConfiguration(scfg) {
@@ -266,10 +311,18 @@ stdin.on('data', function(chunk) {
   data += chunk;
 });
 
+
+
 stdin.on('end', function() {
-  const cfg = loadConfiguration(data);
+  // input stream is base64string
+  // const subscription = atob(data);
+
+  const subscription = data;
+  const json = loadSubscription(subscription)
+  const cfg = loadConfiguration(json);
   // const sscmd = getShadowsocksStartupScript(cfg);
   // const ssverbose = getShadowsocksStartupVerboseScript(cfg);
+
 
   const sscli = getShadowsocksCli(cfg);
   const haproxy = getHaproxyConfiguration(cfg);
