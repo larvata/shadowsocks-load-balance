@@ -91,6 +91,18 @@ function parseServerConfiguration(scfg) {
       k: 'korea',
       c: '韩国',
     },
+    {
+      k: 'england',
+      c: '英国',
+    },
+    {
+      k: 'london',
+      c: '伦敦',
+    },
+    {
+      k: 'sgzx',
+      c: '深港专线',
+    },
   ].some((c) => {
     if (scfg.remarks.includes(c.c)) {
       result.country = c.k;
@@ -111,7 +123,16 @@ function parseServerConfiguration(scfg) {
 
 function getShadowsocksCli(sscfg) {
   // extract auth info
-  const cli = sscfg.map((ss) => `ss-local -s ${ss.server} -p ${ss.server_port} -m ${ss.method} -k ${ss.password} -l ${ss.local_port} -b 0.0.0.0 --plugin ${ss.plugin} --plugin-opts "${ss.plugin_opts}"`);
+  const cli = sscfg.map((ss) => {
+    let cmd = `ss-local -s ${ss.server} -p ${ss.server_port} -m ${ss.method} -k ${ss.password} -l ${ss.local_port} -b 0.0.0.0`;
+    if (ss.plugin) {
+      cmd = `${cmd} --plugin ${ss.plugin}`;
+    }
+    if (ss.plugin_opts) {
+      cmd = `${cmd} --plugin-opts "${ss.plugin_opts}"`;
+    }
+    return cmd;
+  });
   const ssCli = cli.join('\n');
   return ssCli;
 }
