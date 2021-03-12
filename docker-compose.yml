@@ -4,19 +4,19 @@ services:
     image: kaive/shadowsocks-libev
     user: root
     volumes:
-      - ./ss-run.sh:/entrypoint.sh
-      - ./ss-cli.lst:/ss.lst
-    command: /entrypoint.sh -v
+      - ./shadowsocks/ss-run.sh:/entrypoint.sh
+      - ./shadowsocks/ss-cli.lst:/ss.lst
+    command: /entrypoint.sh
     networks:
       - proxies
-    ports:
-      - "9000-9059:9000-9059"
+    # ports:
+    #   - "9000-9131:9000-9131"
 
   # load balansce
   haproxy:
     image: haproxy:latest
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
       - ss-local-clusters
     networks:

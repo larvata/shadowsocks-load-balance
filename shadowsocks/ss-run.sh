@@ -17,9 +17,9 @@ do
   lport=$((lport+1))
 
   if [ "$1" == "-v" ]; then
-    cmd="$line -v >> $logpath &"
+    cmd="$line -v | sed -e 's/^/[${lport}] /;' > $logpath &"
   else
-    cmd="$line -f $idx.pid"
+    cmd="$line -f $idx.pid | sed -e 's/^/[${lport}] /;'"
   fi
 
   # echo $cmd

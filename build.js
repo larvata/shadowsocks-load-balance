@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
-const url = require('url')
-const querystring = require('querystring')
+const url = require('url');
+const querystring = require('querystring');
 
 
 // port for ss local
@@ -12,7 +12,6 @@ const PORT_START = 9000;
 const EXPORT_START = 8000;
 
 function atob(base64) {
-  console.log(base64)
   const buff = Buffer.from(base64, 'base64');
   return buff.toString('utf-8');
 }
@@ -38,7 +37,7 @@ function loadConfiguration(cfg) {
 }
 
 function loadSubscription(subscription) {
-  const lines = subscription.split('\n').filter(l=>l);
+  const lines = subscription.split('\n').filter((l) => l);
   return lines.map((line) => {
     const u = url.parse(line);
 
@@ -69,9 +68,8 @@ function loadSubscription(subscription) {
       result.group = group;
     }
 
-    console.log(result);
     return result;
-  })
+  });
 }
 
 function parseServerConfiguration(scfg) {
@@ -148,6 +146,10 @@ function parseServerConfiguration(scfg) {
       k: 'sgzx',
       c: '深港专线',
     },
+    {
+      k: 'malaysia',
+      c: '马来西',
+    },
   ].some((c) => {
     if (scfg.remarks.includes(c.c)) {
       result.country = c.k;
@@ -158,7 +160,7 @@ function parseServerConfiguration(scfg) {
   // result.key = `${result.level}`;
   // console.log(result.country)
   if (!result.country) {
-    console.log(scfg.remarks)
+    console.log('unresolved:', scfg.remarks);
   }
   result.key = result.country;
   result.haproxyKey = `server ${scfg.server}-${scfg.server_port}-${Math.random().toString(36).substring(2, 7)} ss-local-clusters:${scfg.local_port} check inter 10m`;
@@ -329,7 +331,7 @@ stdin.on('end', function() {
 
   // fs.writeFileSync('ss-cmd.sh', sscmd);
   // fs.writeFileSync('ss-cmd-verbose.sh', ssverbose);
-  fs.writeFileSync('ss-cli.lst', sscli);
-  fs.writeFileSync('haproxy.cfg', haproxy);
+  fs.writeFileSync('shadowsocks/ss-cli.lst', sscli);
+  fs.writeFileSync('haproxy/haproxy.cfg', haproxy);
   console.log('done.');
 });
