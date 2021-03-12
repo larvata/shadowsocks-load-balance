@@ -60,7 +60,7 @@ function loadSubscription(subscription) {
     if (qs.plugin) {
       const [plugin, plugin_opts, plugin_opts_rest] = qs.plugin.split(';');
       result.plugin = plugin;
-      result.plugin_opts = [plugin_opts, plugin_opts_rest].join(':');
+      result.plugin_opts = [plugin_opts, plugin_opts_rest].join(';');
     }
 
     if (qs.group) {
@@ -341,6 +341,7 @@ stdin.on('end', function() {
 
   const subscription = data;
   const json = loadSubscription(subscription)
+
   const cfg = loadConfiguration(json);
   // const sscmd = getShadowsocksStartupScript(cfg);
   // const ssverbose = getShadowsocksStartupVerboseScript(cfg);
@@ -351,6 +352,7 @@ stdin.on('end', function() {
 
   // fs.writeFileSync('ss-cmd.sh', sscmd);
   // fs.writeFileSync('ss-cmd-verbose.sh', ssverbose);
+  fs.writeFileSync('tmp.json', JSON.stringify(json, null, 2));
   fs.writeFileSync('shadowsocks/ss-cli.lst', sscli);
   fs.writeFileSync('haproxy/haproxy.cfg', haproxy);
   console.log('done.');
