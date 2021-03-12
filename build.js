@@ -150,6 +150,26 @@ function parseServerConfiguration(scfg) {
       k: 'malaysia',
       c: '马来西',
     },
+    {
+      k: 'us',
+      c: '广美',
+    },
+    {
+      k: 'singapore',
+      c: '广新',
+    },
+    {
+      k: 'japan',
+      c: '广日',
+    },
+    {
+      k: 'hongkong',
+      c: '广港',
+    },
+    {
+      k: 'korea',
+      c: '广韩',
+    },
   ].some((c) => {
     if (scfg.remarks.includes(c.c)) {
       result.country = c.k;
