@@ -291,7 +291,8 @@ function getHaproxyConfiguration(sscfg) {
   `)
 
     grouped[k].data.forEach(s => {
-      backendLines.push(`    ${s.haproxyKey}`);
+      // only apply online check for mixed group
+      backendLines.push(`    ${s.haproxyKey.replace(/ check inter 10m$/, '')}`);
     })
   })
 
