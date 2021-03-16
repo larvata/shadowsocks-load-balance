@@ -183,7 +183,7 @@ function parseServerConfiguration(scfg) {
     console.log('unresolved:', scfg.remarks);
   }
   result.key = result.country;
-  result.haproxyKey = `server ${scfg.server}-${scfg.server_port}-${Math.random().toString(36).substring(2, 7)} ss-local-clusters:${scfg.local_port} check inter 10m`;
+  result.haproxyKey = `server ${scfg.server}-${scfg.server_port}-${Math.random().toString(36).substring(2, 7)} ss-local-clusters:${scfg.local_port} check inter 2m`;
   return { ...result, ...scfg };
 }
 
@@ -292,7 +292,7 @@ function getHaproxyConfiguration(sscfg) {
 
     grouped[k].data.forEach(s => {
       // only apply online check for mixed group
-      backendLines.push(`    ${s.haproxyKey.replace(/ check inter 10m$/, '')}`);
+      backendLines.push(`    ${s.haproxyKey.replace(/ check inter 2m$/, '')}`);
     })
   })
 
